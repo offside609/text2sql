@@ -1,4 +1,3 @@
-cat > .gitignore << 'EOF'
 # Python
 __pycache__/
 *.py[cod]
@@ -14,6 +13,10 @@ ENV/
 *.sqlite
 *.db
 data/db/*.sqlite
+
+# Dataset CSV files (too large for GitHub)
+dataset/**/*.csv
+dataset/**/*.CSV
 
 # Environment variables
 .env
@@ -32,4 +35,3 @@ Thumbs.db
 
 # LangSmith / LangChain
 .langchain/
-EOF

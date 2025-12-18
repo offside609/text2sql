@@ -12,6 +12,8 @@ A production-grade Text-to-SQL agent built with LangGraph that converts natural 
 - **Clarification Support**: Asks for clarification when queries are ambiguous
 - **LangSmith Integration**: Built-in tracing support for observability
 
+
+
 ## Project Structure
 
 ```
@@ -84,7 +86,93 @@ LANGCHAIN_PROJECT=text-to-sql-agent
 
 **Note**: The agent will work with fallback rule-based methods if no LLM API key is provided, but LLM integration provides much better results.
 
+## Dataset Setup
+
+**Important**: The dataset CSV files are not included in this repository due to their large size (some files exceed GitHub's 100 MB limit). You need to download and place them manually.
+
+### Required Folder Structure
+
+Create the following exact folder structure in the `sqlagent/` directory:
+
+```
+sqlagent/
+├── dataset/
+│   ├── musicoset_popularity/
+│   │   ├── album_chart.csv
+│   │   ├── album_pop.csv
+│   │   ├── artist_chart.csv
+│   │   ├── artist_pop.csv
+│   │   ├── song_chart.csv
+│   │   └── song_pop.csv
+│   ├── musicoset_metadata/
+│   │   ├── albums.csv
+│   │   ├── artists.csv
+│   │   ├── releases.csv
+│   │   ├── songs.csv
+│   │   └── tracks.csv
+│   └── musicoset_songfeatures/
+│       ├── acoustic_features.csv
+│       └── lyrics.csv
+```
+
+### Downloading the Datasets
+
+You need to obtain the dataset files from the original sources:
+
+1. **musicoset_popularity** (6 CSV files):
+   - `album_chart.csv`
+   - `album_pop.csv`
+   - `artist_chart.csv`
+   - `artist_pop.csv`
+   - `song_chart.csv`
+   - `song_pop.csv`
+
+2. **musicoset_metadata** (5 CSV files):
+   - `albums.csv`
+   - `artists.csv`
+   - `releases.csv`
+   - `songs.csv`
+   - `tracks.csv`
+
+3. **musicoset_songfeatures** (2 CSV files):
+   - `acoustic_features.csv`
+   - `lyrics.csv` (⚠️ Large file: ~142 MB)
+
+### Quick Setup Commands
+
+```bash
+# Navigate to project directory
+cd sqlagent
+
+# Create dataset directory structure
+mkdir -p dataset/musicoset_popularity
+mkdir -p dataset/musicoset_metadata
+mkdir -p dataset/musicoset_songfeatures
+
+# Place your CSV files in the respective directories
+# Example:
+# cp /path/to/your/files/*.csv dataset/musicoset_popularity/
+```
+
+### Verify Dataset Files
+
+After placing the files, verify the structure:
+
+```bash
+# Check all files are present
+ls -lh dataset/musicoset_popularity/*.csv
+ls -lh dataset/musicoset_metadata/*.csv
+ls -lh dataset/musicoset_songfeatures/*.csv
+
+# Expected output: 13 CSV files total
+find dataset -name "*.csv" | wc -l  # Should output: 13
+```
+
+**Note**: The `dataset/` directory and its subdirectories are tracked by git, but the `.csv` files themselves are ignored (see `.gitignore`). This allows the folder structure to be preserved in the repository while excluding large data files.
+
 ## Loading the Dataset
+
+**Prerequisites**: Make sure you have set up the dataset files as described in the [Dataset Setup](#dataset-setup) section above.
 
 The project includes three datasets that need to be loaded into SQLite:
 
@@ -94,11 +182,14 @@ The project includes three datasets that need to be loaded into SQLite:
 
 ### Step 1: Verify Dataset Files
 
-Ensure all CSV files are present in the `dataset/` directory:
+Ensure all CSV files are present in the `dataset/` directory with the correct folder structure:
 
 ```bash
 # Check dataset structure
 ls -R dataset/
+
+# Verify file count
+find dataset -name "*.csv" | wc -l  # Should output: 13
 ```
 
 You should see:
@@ -169,5 +260,7 @@ Enter your questions (type 'exit', 'quit', or 'q' to stop)
 Type 'help' for usage examples
 
 > Show me the top 10 pop songs from 2018
+
+Read Graph.md to understand graph and its conditional logics
 ```
 
