@@ -35,3 +35,6 @@ Thumbs.db
 
 # LangSmith / LangChain
 .langchain/
+
+# Amp orb portals
+.amp/portals/*

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Prepares an Amp orb: Python virtualenv at .venv with requirements.txt installed.
+# Must stay non-interactive and idempotent (reruns on stale snapshots).
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+step() { echo "==> $*"; }
+timed() { local start=$SECONDS; "$@"; echo "    (${1} took $((SECONDS - start))s)"; }
+
+if ! command -v uv >/dev/null 2>&1; then
+  step "Installing uv"
+  timed python3 -m pip install --user --quiet uv
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+if [ ! -x .venv/bin/python ]; then
+  step "Creating .venv"
+  timed uv venv --python python3 .venv
+fi
+
+step "Installing Python dependencies"
+timed uv pip install --python .venv/bin/python -r requirements.txt
+
+# Activate .venv in login shells started from the repo root (Amp, orb services).
+profile_marker="# text2sql: activate repository virtualenv"
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+  step "Adding .venv activation to ~/.bash_profile"
+  cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_marker
+if [[ -z "\${VIRTUAL_ENV:-}" && "\${PWD}" == "$repo_root"* && -f "$repo_root/.venv/bin/activate" ]]; then
+  . "$repo_root/.venv/bin/activate"
+fi
+EOF
+fi
+
+step "Done"
